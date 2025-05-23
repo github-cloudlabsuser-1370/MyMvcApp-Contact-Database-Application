@@ -1,0 +1,50 @@
+name: Deploy ASP.NET App to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AZURE_WEBAPP_NAME: my-mvcapp-webapp
+  AZURE_RESOURCE_GROUP: my-resource-group
+  AZURE_REGION: westeurope
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        run: dotnet build ./MyMvcApp-Contact-Database-Application/MyMvcApp-Contact-Database-Application.csproj --configuration Release
+
+      - name: Publish
+        run: dotnet publish ./MyMvcApp-Contact-Database-Application/MyMvcApp-Contact-Database-Application.csproj --configuration Release --output ./publish
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy ARM Template
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: ./MyMvcApp-Contact-Database-Application/deploy.json
+          parameters: ./MyMvcApp-Contact-Database-Application/deploy.parameters.json
+          deploymentName: github-actions-deployment
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ./publish
+
