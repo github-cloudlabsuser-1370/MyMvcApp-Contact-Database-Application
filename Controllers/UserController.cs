@@ -9,10 +9,16 @@ public class UserController : Controller
     public static System.Collections.Generic.List<User> userlist = new System.Collections.Generic.List<User>();
 
     // GET: User
-    public ActionResult Index()
+    public ActionResult Index(string searchString)
     {
-        // Return the list of users to the Index view
-        return View(userlist);
+        var users = userlist.AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            users = users.Where(u => u.Name.Contains(searchString) || u.Email.Contains(searchString));
+        }
+
+        return View(users.ToList());
     }
 
     // GET: User/Details/5
