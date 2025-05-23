@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ASP-app
-          path: '/published/**'
+          path: 'D:\a\MyMvcApp-Contact-Database-Application\bin\Release\net8.0\MyMvcApp'
 
   deploy:
     runs-on: windows-latest
